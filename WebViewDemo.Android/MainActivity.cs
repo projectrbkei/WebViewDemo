@@ -1,13 +1,12 @@
 ﻿using System;
-
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
-using Android.Runtime;
 using Android.OS;
+using Android.Provider;
+using Android.Runtime;
 using Android.Webkit;
 using Java.IO;
-using Android.Content;
-using Android.Provider;
 
 namespace WebViewDemo.Droid
 {
@@ -16,48 +15,69 @@ namespace WebViewDemo.Droid
     {
         public static IValueCallback mUploadCallbackAboveL;
         public static Android.Net.Uri imageUri;
-        public static MainActivity Instance;
+        public static MainActivity Instance { get; private set; }
         public static int PHOTO_REQUEST = 10023;
         public static IValueCallback mUploadMessage;
         public static int FILECHOOSER_RESULTCODE = 1;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            TabLayoutResource = Resource.Layout.Tabbar;
+            ToolbarResource = Resource.Layout.Toolbar;
+
             base.OnCreate(savedInstanceState);
 
+            Instance = this;
+
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent intent)
         {
-            if (requestCode == PHOTO_REQUEST)
+            if (requestCode == FILECHOOSER_RESULTCODE)
             {
-                if (resultCode == Result.Ok)
-                {
-                    Android.Net.Uri result = intent.Data ?? imageUri;
-                    if (mUploadCallbackAboveL != null)
-                    {
-                        mUploadCallbackAboveL.OnReceiveValue(new Android.Net.Uri[] { result });
-                    }
-                }
-                else
-                {
-                    mUploadCallbackAboveL.OnReceiveValue(null);
-                }
-                mUploadCallbackAboveL = null;
+                if (null == mUploadMessage) return;
+                Android.Net.Uri result = intent == null || resultCode != Result.Ok ? null : intent.Data;
+                mUploadMessage.OnReceiveValue(result);
+                mUploadMessage = null;
             }
-            else
+            else if (requestCode == PHOTO_REQUEST)
             {
-                base.OnActivityResult(requestCode, resultCode, intent);
+                Android.Net.Uri result = intent == null || resultCode != Result.Ok ? null : intent.Data;
+                if (mUploadCallbackAboveL != null)
+                {
+                    onActivityResultAboveL(requestCode, resultCode, intent);
+                }
+                else if (mUploadMessage != null)
+                {
+                    mUploadMessage.OnReceiveValue(result);
+                    mUploadMessage = null;
+                }
             }
+        }
+
+        private void onActivityResultAboveL(int requestCode, Result resultCode, Intent data)
+        {
+            if (requestCode != PHOTO_REQUEST || mUploadCallbackAboveL == null)
+            {
+                return;
+            }
+            Android.Net.Uri[] results = null;
+            if (resultCode == Result.Ok)
+            {
+                results = new Android.Net.Uri[] { imageUri };
+                results[0] = MainActivity.imageUri;
+            }
+            mUploadCallbackAboveL.OnReceiveValue(results);
+            mUploadCallbackAboveL = null;
         }
     }
 

@@ -1,8 +1,11 @@
-﻿using Android.Annotation;
+﻿using System;
+using Android.Annotation;
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Provider;
 using Android.Webkit;
+using Java.IO;
 using WebViewDemo;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
@@ -12,10 +15,10 @@ namespace WebViewDemo.Droid
 {
     public class MyWebViewRenderer : WebViewRenderer
     {
-        Activity mContext;
+        //Activity mContext;
         public MyWebViewRenderer(Context context) : base(context)
         {
-            this.mContext = context as Activity;
+            //this.mContext = context as Activity;
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Xamarin.Forms.WebView> e)
@@ -27,29 +30,8 @@ namespace WebViewDemo.Droid
 
             Control.ClearCache(true);
 
-            MyWebClient cwc = new MyWebClient(MainActivity.Instance);
+            CustomWebChromeClient cwc = new CustomWebChromeClient(MainActivity.Instance);
             Control.SetWebChromeClient(cwc);
-        }
-
-        public class MyWebClient : WebChromeClient
-        {
-            Activity mContext;
-            public MyWebClient(Activity context)
-            {
-                this.mContext = context;
-            }
-            [TargetApi(Value = 21)]
-            public override void OnPermissionRequest(PermissionRequest request)
-            {
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
-                {
-                    mContext.RunOnUiThread(() =>
-                    {
-                        request.Grant(request.GetResources());
-
-                    });
-                }
-            }
         }
     }
 }

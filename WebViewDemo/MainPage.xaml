@@ -2,8 +2,6 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:customeWebView="clr-namespace:WebViewDemo"
              x:Class="WebViewDemo.MainPage">
-
-    
-        <customeWebView:MyWebView HeightRequest="1000" WidthRequest="1000" Source="https://test.rbkei.org/"/>
-
+    <customeWebView:MyWebView HeightRequest="1000" WidthRequest="1000" Source="https://webrtc.github.io/samples/src/content/devices/input-output/"/>
+    <!--<WebView Source="https://www.onlinemictest.com/webcam-test/"/>-->
 </ContentPage>
